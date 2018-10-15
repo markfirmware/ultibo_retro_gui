@@ -66,7 +66,22 @@ var
 
 //------------------- The main program
 
+procedure RestoreBootFile(Prefix,FileName:String);
+var
+ Source:String;
 begin
+ Source:=Prefix + '-' + FileName;
+// Log(Format('Restoring from %s ...',[Source]));
+ while not DirectoryExists('C:\') do
+  sleep(500);
+ if FileExists(Source) then
+  CopyFile(PChar(Source),PChar(FileName),False);
+// Log(Format('Restoring from %s done',[Source]));
+end;
+
+begin
+
+RestoreBootFile('default','config.txt');
 
 initmachine(144);     // 16+128=hi, double buffered TODO init @19
 sleep(1);
