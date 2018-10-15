@@ -34,6 +34,7 @@ uses  //Ultibo units
   blitter,
   retro, simpleaudio, {scripttest,} xmp, mwindows, calculatorunit, icons, sysinfo,
   playerunit, captureunit, mandelbrot, notepad, c64, fmsynth,
+  uVNCCamera, uVNCClock, uLog, SMSC95XX, LAN78XX,
   camera1;
 
 const ver='Colors v. 0.30 --- 2018.04.30';
@@ -64,9 +65,32 @@ var
     clock:string;
     testptr:pointer;
 
+procedure RestoreBootFile(Prefix,FileName:String);
+var
+ Source:String;
+begin
+ Source:=Prefix + '-' + FileName;
+ Log(Format('Restoring from %s ...',[Source]));
+ while not DirectoryExists('C:\') do
+  sleep(500);
+ if FileExists(Source) then
+  CopyFile(PChar(Source),PChar(FileName),False);
+ Log(Format('Restoring from %s done',[Source]));
+end;
+
+procedure LogProc (S: String);
+begin
+  LoggingOutput (S);
+end;
+
 //------------------- The main program
 
 begin
+
+SetLogProc (@LogProc);
+RestoreBootFile ('default','config.txt');
+VncCameraServer (5900);
+VncClockServer (5901);
 
 initmachine(144);     // 16+128=hi, double buffered TODO init @19
 sleep(1);
@@ -295,4 +319,3 @@ if sfh>0 then fileclose(sfh);
 stopmachine;
 systemrestart(0);
 end.
-
