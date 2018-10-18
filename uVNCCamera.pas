@@ -5,15 +5,12 @@ interface
 procedure VncCameraServer (SetPort: Integer);
 
 implementation
-
 uses
-   GlobalConst, GlobalTypes, GlobalConfig, SysUtils, uVNC, uCanvas, Threads, uLog, Winsock2;
+  GlobalConst, GlobalTypes, GlobalConfig, SysUtils, uVNC, uCanvas, Threads, uLog, Winsock2;
 
 var
   Port: Integer;
   LoopHandle:TThreadHandle = INVALID_HANDLE_VALUE;
-
-var
   IPAddress : string;
 
 function WaitForIPComplete : string;

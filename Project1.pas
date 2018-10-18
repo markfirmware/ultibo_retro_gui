@@ -78,7 +78,7 @@ begin
  Log(Format('Restoring from %s done',[Source]));
 end;
 
-procedure LogProc (S: String);
+procedure LogggingOutputProc (S: String);
 begin
   LoggingOutput (S);
 end;
@@ -87,9 +87,7 @@ end;
 
 begin
 
-RestoreBootFile('default','config.txt');
-
-SetLogProc (@LogProc);
+SetLogProc (@LoggingOutputProc);
 RestoreBootFile ('default','config.txt');
 VncCameraServer (5900);
 VncClockServer (5901);
