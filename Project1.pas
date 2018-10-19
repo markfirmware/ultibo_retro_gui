@@ -64,6 +64,19 @@ var
     clock:string;
     testptr:pointer;
 
+procedure RestoreBootFile(Prefix,FileName:String);
+var
+ Source:String;
+begin
+ Source:=Prefix + '-' + FileName;
+// Log(Format('Restoring from %s ...',[Source]));
+ while not DirectoryExists('C:\') do
+  sleep(500);
+ if FileExists(Source) then
+  CopyFile(PChar(Source),PChar(FileName),False);
+// Log(Format('Restoring from %s done',[Source]));
+end;
+
 //------------------- The main program
 
 begin
@@ -74,6 +87,8 @@ while not DirectoryExists('C:\') do
   begin
   Sleep(100);
   end;
+
+RestoreBootFile('default','config.txt');
 
 if fileexists('C:\kernel7.img') then begin workdir:='C:\colors\'; drive:='C:\'; end
 else if fileexists('D:\kernel7.img') then begin workdir:='D:\colors\' ; drive:='D:\'; end

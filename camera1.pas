@@ -51,6 +51,8 @@ var camerathread:TCameraThread;
 procedure camera;
 
 implementation
+uses
+  GlobalConst, SMSC95XX, LAN78XX, uVNC, uCanvas, WinSock2;
 
 var camerabufferfilled:boolean;
 
@@ -195,6 +197,23 @@ procedure camera;
 
 label p999;
 
+function WaitForIPComplete : string;
+var
+  TCP : TWinsock2TCPClient;
+begin
+  TCP := TWinsock2TCPClient.Create;
+  Result := TCP.LocalAddress;
+  if (Result = '') or (Result = '0.0.0.0') or (Result = '255.255.255.255') then
+    begin
+      while (Result = '') or (Result = '0.0.0.0') or (Result = '255.255.255.255') do
+        begin
+          sleep (1000);
+          Result := TCP.LocalAddress;
+        end;
+    end;
+  TCP.Free;
+end;
+
 var err:OMX_ERRORTYPE;
     portdef:OMX_PARAM_PORTDEFINITIONTYPE;
     callbackOMX:OMX_CALLBACKTYPE;
@@ -206,6 +225,9 @@ var err:OMX_ERRORTYPE;
 
     nOffsetU, nOffsetV, nFrameMax, nFrames:cardinal;
     PBuffer: POMX_BUFFERHEADERTYPE;
+
+    IPAddress : string;
+    aVnc: TVNCServer;
 
 begin
 
@@ -355,6 +377,14 @@ y2:=cardinal(mContext.pSrcY);
 
 // ----- MAIN CAPTURE LOOP -----------------------------------------------------
 
+IPAddress := WaitForIpComplete;
+aVNC := TVNCServer.Create (5900);
+aVNC.InitCanvas (320, 180);
+aVNC.Canvas.Fill (COLOR_WHITE);
+aVNC.Title := 'Camera Test of Ultibo VNC Server';;
+aVNC.Active := true;
+print_log (Format ('VNC server is active at %s::5900',[IPAddress]));
+
 while keypressed do readkey;
 while(nFrames < nFrameMax) and (not keypressed) do
   begin
@@ -363,9 +393,15 @@ while(nFrames < nFrameMax) and (not keypressed) do
     nFrames+=1;
     OMX_FillThisBuffer(mContext.pCamera, mContext.pBufferCameraOut);
     scale4c(y2,cardinal(miniwindow.canvas),cyres div 4,cxres) ;
+    if nFrames mod 10 = 0 then
+      vncscale4c(y2,cardinal(aVnc.Canvas.Buffer),cyres div 4,cxres) ;
     fastmove(y2,cardinal(rendertestwindow.canvas),cxres*cyres);
     t1:=gettime-t1; rendertestwindow.outtextxyz(4,44,inttostr(t1),255,2,2); t1:=gettime;
     rendertestwindow.outtextxyz(4,4,inttostr(nframes),255,2,2);
+
+//  aVnc.Canvas.Fill (SetRect (40, 180, 280, 260), nFrames);
+//  aVnc.Canvas.DrawText (40, 240, Format ('%d', [nFrames]), 'arial', 24, COLOR_BLACK);
+
     camerabufferfilled:=false;
     end;
   threadsleep(0);
@@ -403,4 +439,3 @@ end;
 
 
 end.
-

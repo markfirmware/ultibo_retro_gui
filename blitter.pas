@@ -18,6 +18,7 @@ procedure fill2d32(dest,x,y,length,lines,bpl:integer;color:cardinal);
 procedure scale4(from,too,length,bpl:integer);
 procedure scale4b(from,too,length,bpl:integer);
 procedure scale4c(from,too,lines,bpl:integer);
+procedure vncscale4c(from,too,lines,bpl:integer);
 
 implementation
 
@@ -206,6 +207,50 @@ p101:             mov r12,#0
 
                   ldrb r6,[r0],#4
                   strb r6,[r1],#1
+
+                  subs r7,#4
+                  bgt  p101
+
+                  add r0,r0,r3
+                  add r0,r0,r3
+                  add r0,r0,r3
+
+                //  sub r0,#4
+
+                  subs r2,#1
+                  bgt p102
+                  pop {r0-r12}
+                  end;
+end;
+
+
+procedure vncscale4c(from,too,lines,bpl:integer);
+
+// --- rev 20181014
+
+
+label p101,p102;
+
+begin
+
+
+                  asm
+                  push {r0-r12}
+                  ldr r0,from
+                  ldr r1,too
+                  ldr r2,lines
+                  ldr r3,bpl
+
+p102:             mov r7,r3
+
+p101:             mov r12,#0
+
+                  ldrb r6,[r0],#4
+                  add r6,r6,r6,lsl #8
+                  add r6,r6,r6,lsl #16
+                  lsr r6,#8
+                  str  r6,[r1],#4
+                  // strb r6,[r1],#1
 
                   subs r7,#4
                   bgt  p101
